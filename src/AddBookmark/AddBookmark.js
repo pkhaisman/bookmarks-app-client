@@ -1,6 +1,7 @@
 import React, { Component } from  'react';
 import config from '../config'
 import './AddBookmark.css';
+import { Redirect } from 'react-router-dom';
 
 const Required = () => (
   <span className='AddBookmark__required'>*</span>
@@ -13,6 +14,7 @@ class AddBookmark extends Component {
 
   state = {
     error: null,
+    redirectToList: false,
   };
 
   handleSubmit = e => {
@@ -42,6 +44,8 @@ class AddBookmark extends Component {
             throw error
           })
         }
+        // redirect back to list
+        this.setState({ redirectToList: true })
         return res.json()
       })
       .then(data => {
@@ -59,6 +63,11 @@ class AddBookmark extends Component {
   render() {
     const { error } = this.state
     const { onClickCancel } = this.props
+
+    if (this.state.redirectToList) {
+      return <Redirect to='/' />
+    }
+
     return (
       <section className='AddBookmark'>
         <h2>Create a bookmark</h2>

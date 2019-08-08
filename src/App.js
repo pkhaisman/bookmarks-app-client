@@ -1,33 +1,14 @@
 import React, { Component } from 'react';
 import AddBookmark from './AddBookmark/AddBookmark';
 import BookmarkList from './BookmarkList/BookmarkList';
+import UpdateBookmark from './UpdateBookmark/UpdateBookmark'
 import Nav from './Nav/Nav';
 import config from './config';
 import './App.css';
+// import { runInContext } from 'vm';
+import { Route } from 'react-router-dom'
 
-const bookmarks = [
-  // {
-  //   id: 0,
-  //   title: 'Google',
-  //   url: 'http://www.google.com',
-  //   rating: '3',
-  //   desc: 'Internet-related services and products.'
-  // },
-  // {
-  //   id: 1,
-  //   title: 'Thinkful',
-  //   url: 'http://www.thinkful.com',
-  //   rating: '5',
-  //   desc: '1-on-1 learning to accelerate your way to a new high-growth tech career!'
-  // },
-  // {
-  //   id: 2,
-  //   title: 'Github',
-  //   url: 'http://www.github.com',
-  //   rating: '4',
-  //   desc: 'brings together the world\'s largest community of developers.'
-  // }
-];
+const bookmarks = [];
 
 class App extends Component {
   state = {
@@ -53,6 +34,15 @@ class App extends Component {
       bookmarks: [ ...this.state.bookmarks, bookmark ],
     })
   }
+  // check to see if this code works
+  updateBookmark = updatedBookmark => {
+    const bookmarks = this.state.bookmarks;
+    const indexOfUpdatedBookmark = bookmarks.findIndex(bookmark => bookmark.id === updatedBookmark.id);
+    bookmarks.splice(indexOfUpdatedBookmark, 1, updatedBookmark)
+    this.setState({
+      bookmarks: bookmarks
+    })
+  };
 
   componentDidMount() {
     fetch(config.API_ENDPOINT, {
@@ -73,23 +63,39 @@ class App extends Component {
   }
 
   render() {
-    const { page, bookmarks } = this.state
+    const { bookmarks } = this.state
     return (
       <main className='App'>
         <h1>Bookmarks!</h1>
         <Nav clickPage={this.changePage} />
         <div className='content' aria-live='polite'>
-          {page === 'add' && (
-            <AddBookmark
-              onAddBookmark={this.addBookmark}
-              onClickCancel={() => this.changePage('list')}
-            />
-          )}
-          {page === 'list' && (
-            <BookmarkList
-              bookmarks={bookmarks}
-            />
-          )}
+          <Route
+            exact
+            path='/'
+            render={() =>
+              <BookmarkList
+                bookmarks={bookmarks} 
+              />}
+          />
+          
+          <Route
+            path='/add-bookmark'
+            render={({ history }) => 
+              <AddBookmark
+                onAddBookmark={this.addBookmark}
+                onClickCancel={() => history.push('/')}
+              />}
+          />
+
+          <Route
+            path='/update-bookmark/:id'
+            render={({ history, match }) => 
+              <UpdateBookmark
+                match={match}
+                onUpdateBookmark={this.updateBookmark}
+                onClickCancel={() => history.push('/')} />
+            }
+          />
         </div>
       </main>
     );
